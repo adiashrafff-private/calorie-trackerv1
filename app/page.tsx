@@ -288,17 +288,17 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12 flex justify-between items-start">
           <div>
-            <h1 className="text-5xl font-black text-white mb-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black">
               🍎 Calorie Tracker
             </h1>
             <p className="text-slate-300 text-lg">Monitor your daily nutrition with style</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => setShowProfile(!showProfile)}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
@@ -338,7 +338,7 @@ export default function Dashboard() {
             <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 px-8 py-6">
               <h2 className="text-3xl font-black text-white">⚙️ Your Profile</h2>
             </div>
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Height */}
                 <div>
@@ -483,7 +483,7 @@ export default function Dashboard() {
             </p>
             <div className="flex items-end justify-between mb-6">
               <div className="flex-1">
-                <p className="text-7xl font-black text-white">{getTotalCalories()}</p>
+                <p className="text-4xl sm:text-5xl lg:text-7xl font-black text-white">{getTotalCalories()}</p>
                 <p className="text-cyan-100 text-lg mt-2">out of {dailyLimit} calories</p>
               </div>
               <div className="text-6xl opacity-20">🔥</div>
@@ -519,7 +519,7 @@ export default function Dashboard() {
                 <div className="space-y-3">
                   {history.map((record, index) => (
                     <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                         <div>
                           <p className="font-bold text-gray-800">{record.date}</p>
                           <p className="text-sm text-gray-600">
@@ -576,7 +576,7 @@ export default function Dashboard() {
                     <p className="text-gray-600 font-semibold text-sm mb-3 uppercase tracking-wide">
                       Add New Item
                     </p>
-                    <div className="flex gap-2 mb-3">
+                    <div className="flex flex-wrap gap-2">
                       <input
                         type="text"
                         placeholder="Food name (e.g. banana)"
