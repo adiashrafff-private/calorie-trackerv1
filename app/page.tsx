@@ -8,6 +8,7 @@ interface DayRecord {
 }
 
 interface UserProfile {
+  name: string
   height: number
   weight: number
   age: number
@@ -76,6 +77,13 @@ export default function Dashboard() {
     snacks: [],
   })
 
+  const NAME_KEY = 'calorieTrackerUserName'
+
+  const [userName, setUserName] = useState('')
+  const [tempName, setTempName] = useState('')
+  const [showNameModal, setShowNameModal] = useState(false)
+
+
   const [inputs, setInputs] = useState({
     breakfast: { name: '', calories: '' },
     lunch: { name: '', calories: '' },
@@ -89,6 +97,7 @@ export default function Dashboard() {
   const [showHistory, setShowHistory] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [profile, setProfile] = useState<UserProfile>({
+    name: '',
     height: 170,
     weight: 70,
     age: 25,
@@ -100,6 +109,11 @@ export default function Dashboard() {
 
   // Load data from localStorage on mount
   useEffect(() => {
+
+    const savedName = localStorage.getItem(NAME_KEY)
+    if (savedName) {
+      setUserName(savedName)
+    }
 
     const savedProfile = localStorage.getItem(PROFILE_KEY)
     if (savedProfile) {
@@ -186,42 +200,51 @@ export default function Dashboard() {
     }
   }
 
-  const endDay = () => {
-    const today = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
+const endDay = () => {
+  if (!profile.name.trim()) {
+    setTempName('')
+    setShowNameModal(true)
+    return
+  }
 
-    const dayRecord: DayRecord = {
+  const today = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+
+  const dayRecord: DayRecord = {
     date: today,
     meals: meals,
     totalCalories: getTotalCalories(),
-    }
+  }
 
-    setHistory(prev => {
+  setHistory(prev => {
     const updated = [...prev, dayRecord]
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated))
     return updated
-    })
+  })
 
-    const dataToDownload = {
+  setShowHistory(true)
+
+  const dataToDownload = {
+    userName: profile.name,
     dailyLimit,
     history: [...history, dayRecord],
     exportDate: new Date().toISOString(),
-    }
-
-    const jsonString = JSON.stringify(dataToDownload, null, 2)
-    const blob = new Blob([jsonString], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `calorie-tracker-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
   }
+
+  // const jsonString = JSON.stringify(dataToDownload, null, 2)
+  // const blob = new Blob([jsonString], { type: 'application/json' })
+  // const url = URL.createObjectURL(blob)
+  // const link = document.createElement('a')
+  // link.href = url
+  // link.download = `calorie-tracker-${new Date().toISOString().split('T')[0]}.json`
+  // document.body.appendChild(link)
+  // link.click()
+  // document.body.removeChild(link)
+  // URL.revokeObjectURL(url)
+}
 
   const calculateBMR = (userProfile: UserProfile): number => {
     const { weight, height, age, gender } = userProfile
@@ -312,16 +335,10 @@ export default function Dashboard() {
               📋 History
             </button>
             <button
-              onClick={downloadHistoryAsJSON}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              ⬇️ Download
-            </button>
-            <button
               onClick={endDay}
               className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
             >
-              🏁 End Day
+              🏁 Save
             </button>
             <button
               onClick={clearAllData}
@@ -340,6 +357,19 @@ export default function Dashboard() {
             </div>
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-800 mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={profile.name}
+                    onChange={(e) => handleProfileChange('name', e.target.value)}
+                    placeholder="Your name"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-black font-semibold focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
                 {/* Height */}
                 <div>
                   <label className="block text-sm font-bold text-gray-800 mb-2">Height (cm)</label>
@@ -677,6 +707,48 @@ export default function Dashboard() {
           })}
         </div>
       </div>
+              {/* 🔔 Name Modal */}
+              {showNameModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <h2 className="text-2xl font-black text-gray-800 mb-2">
+                  👋 Enter Your Name
+                </h2>
+            <p className="text-gray-600 mb-4">
+              Please enter your name before ending the day.
+            </p>
+
+            <input
+              type="text"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              placeholder="Your name"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black focus:outline-none focus:border-indigo-500"
+            />
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setShowNameModal(false)}
+                className="flex-1 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!tempName.trim()) return
+                  handleProfileChange('name', tempName)
+                  setShowNameModal(false)
+                  setTempName('')
+                  endDay()
+                }}
+                className="flex-1 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+              >
+                Save & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
